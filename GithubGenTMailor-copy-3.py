@@ -944,4 +944,4 @@ class GithubTMailorGenerator:
 if __name__ == "__main__":
     # Enable Tor by default as requested
     generator = GithubTMailorGenerator(use_tor=True)
-    generator.run_flow_with_retries()
+    generator.run_flow_with_retries(max_retries=1000)
