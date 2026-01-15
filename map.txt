@@ -1,0 +1,86 @@
+if current page url not start with `https://github.com/login` or `https://www.github.com/login`:
+    stop all
+
+fill login form humaly:
+    set email document.querySelector("#login_field")
+    set password document.querySelector("#password")
+    click login document.querySelector("body > div > div > main > div > div > form > div:nth-child(4) > input")
+
+check url multi time must redirect to: https://github.com/dashboard if not stop all
+
+like a human:
+    scroll to the max bottom of the page
+    wait for natural_delay
+    scroll to the middle of the page
+    wait for natural_delay
+    scroll to the max top of the page
+
+natural_delay
+
+Click document.querySelector("body > div > div > react-partial:nth-child(8) > div > header > div > div > div > button[aria-haspopup='menu']")
+
+natural_delay
+
+Click `Settings` document.querySelector("#__primerPortalRoot__ > div > div a[href='/settings/profile']")
+
+natural_delay
+
+Do a small scroll down and return to the top of the page
+
+natural_delay
+
+Click `Password and authentication` document.querySelector("a[href='/settings/security']")
+
+natural_delay
+
+scroll to the max bottom of the page
+
+natural_delay
+
+Click document.querySelector("a[href='/settings/two_factor_authentication/setup/intro']")
+
+natural_delay
+
+Click document.querySelector("#dialog-show-two-factor-setup-verification-mashed-secret")
+
+natural_delay
+
+Get `two-factor secret` from document.querySelector("#two-factor-setup-verification-mashed-secret > scrollable-region > div > div, [data-target='two-factor-setup-verification.mashedSecret']")
+
+Save secret in self.secret
+
+natural_delay
+
+get code using utils function get_2fa_code(secret)
+
+Fill the code in the input field document.querySelector("#two-factor-setup-verification-step > div:nth-child(1) > form > div > div > input")
+
+press Tab
+
+natural_delay
+
+Click `Continue` document.querySelector("#wizard-step-factor > div > div > div > div > div > button[data-action='click:single-page-wizard-step#onNext']")
+if not exists check ul document.querySelector("ul[data-target='two-factor-setup-recovery-codes.codes']") if exists the auto submit was do it
+
+natural_delay
+
+get all `recovery codes` il in the ul document.querySelector("ul[data-target='two-factor-setup-recovery-codes.codes']")
+
+Save recovery codes in self.recovery_codes
+
+natural_delay
+
+Click `Download` document.querySelectorAll("button[data-action='click:two-factor-setup-recovery-codes#onDownloadClick']")
+
+natural_delay
+
+Click `I have saved my recovery codes` document.querySelectorAll("button[data-target='single-page-wizard-step.nextButton']")
+
+natural_delay
+
+Click `Done` document.querySelectorAll("button[data-target='single-page-wizard-step.nextButton']")
+
+Save also Secret and the recovery codes in the json account info
+
+
+Note: For every element we need to wait for it to be visible with a retry mecanisme because can take a time to be visible

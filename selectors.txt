@@ -1,0 +1,9 @@
+iframe 1: document.querySelector("#captcha-container-nux > div > div > div:nth-child(3) > iframe")
+    loading text: document.querySelector("#text-loading")
+    iframe 2: document.querySelector("#funcaptcha > div > iframe")
+        iframe 3: document.querySelector("#game-core-frame")
+            button `Visual puzzle`: document.querySelector("#root > div > div > button[aria-label='Visual puzzle']").click()
+            question: document.querySelector("#root > div > div > div > h2 > span > strong:nth-child(2)").textContent
+            image: document.querySelector("#root > div > div > div > div > div > div > img").style.backgroundImage.match(/url\("(.*?)"\)/)[1]
+            previeus image: document.querySelector("#root > div > div > div > div > div > div > a.left-arrow")
+            next image: document.querySelector("#root > div > div > div > div > div > div > a.right-arrow")

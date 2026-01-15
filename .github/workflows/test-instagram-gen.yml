@@ -1,0 +1,53 @@
+name: Test Instagram Generator
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+
+jobs:
+  test-instagram-gen:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests PySocks stem fake-useragent playwright
+          pip install -r requirements.txt || true # Try to use requirements.txt if available, ignore if not or duplicates
+          playwright install chromium
+      
+      # Optional: Install Tor if you want to test with Tor (though Instagram might block Tor)
+      # The user prompt implied using EmailOnDeck which has Tor support, but usually Playwright runs on direct connection 
+      # unless configured otherwise. The script defaults use_tor=False.
+      
+      - name: Run Instagram Generator
+        run: |
+          python InstagramGen.py
+        env:
+          PYTHONUNBUFFERED: "1"
+      
+      - name: Upload Accounts Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instagram-accounts
+          path: instagram_accounts.json
+          retention-days: 5
+      
+      - name: Upload Debug Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshots
+          path: "*.png"
+          retention-days: 1

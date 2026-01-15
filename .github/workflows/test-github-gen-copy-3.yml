@@ -1,0 +1,96 @@
+name: Test GithubGenTMailor Copy 3
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      use_tor:
+        description: 'Use Tor for requests'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chrome
+          # Install xvfb for headed mode support if needed
+          sudo apt-get install -y xvfb
+      
+      - name: Install Tor
+        if: ${{ github.event_name == 'push' || github.event.inputs.use_tor == 'true' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tor
+      
+      - name: Configure Tor
+        if: ${{ github.event_name == 'push' || github.event.inputs.use_tor == 'true' }}
+        run: |
+          # Configure Tor to match script defaults (9150/9151)
+          echo "ControlPort 9151" | sudo tee -a /etc/tor/torrc
+          echo "SocksPort 9150" | sudo tee -a /etc/tor/torrc
+          echo "CookieAuthentication 0" | sudo tee -a /etc/tor/torrc
+          echo "Log notice file /var/log/tor/log" | sudo tee -a /etc/tor/torrc
+          
+          # Restart Tor service to apply changes
+          sudo systemctl restart tor@default
+          
+          # Wait for Tor to be ready
+          sleep 10
+          
+          # Check status
+          sudo ss -tulpn | grep tor
+          sudo systemctl status tor@default --no-pager
+
+      - name: Patch Script for CI
+        run: |
+          # Remove blocking input at the end of the script
+          sed -i 's/input("Press Enter to close the browser...")/print("Browser closing automatically in CI")/g' GithubGenTMailor-copy-3.py
+          # Force Headless to True in config.py for CI
+          sed -i 's/HEADLESS = False/HEADLESS = True/g' config.py
+          # Patch Chrome Path to Linux standard location (or rely on playwright path)
+          # We use a trick: if we set CHROME_PATH to empty string or None, playwright might auto-detect if we used 'channel="chrome"'
+          # But the script uses executable_path argument.
+          # On GitHub Actions, Chrome is usually at /usr/bin/google-chrome
+          sed -i 's|CHROME_PATH = r"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"|CHROME_PATH = "/usr/bin/google-chrome"|g' config.py
+
+      - name: Run GithubGenTMailor Copy 3
+        env:
+          TOR_PORT: 9150
+          TOR_CONTROL_PORT: 9151
+          PYTHONUNBUFFERED: "1"
+        run: |
+          # Run with xvfb just in case, though we patched HEADLESS=True
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" python GithubGenTMailor-copy-3.py
+      
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-artifacts
+          path: |
+            output/
+            *.png
+            *.html
+            *.log
+          retention-days: 5
