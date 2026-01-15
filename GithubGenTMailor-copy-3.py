@@ -358,6 +358,10 @@ class GithubTMailorGenerator:
                 number_times_iframe1_steel_exists = 0
                 while iframe1_exists:
                     number_times_iframe1_steel_exists += 1
+                    
+                    if number_times_iframe1_steel_exists > 25:
+                        break
+
                     logger("iframe 1 still exists", level=level+2)
 
                     if number_times_iframe1_steel_exists > 5:
@@ -367,6 +371,7 @@ class GithubTMailorGenerator:
                     
                     self.natural_delay()
                     iframe1_exists = self.__check_iframe1_exists(level=level+1)
+
 
                 # 7. Handle Captcha
                 # self.__handle_captcha(level=level+1)
