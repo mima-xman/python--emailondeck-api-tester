@@ -18,6 +18,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        instance: [1, 2, 3, 4, 5, 6]
+      fail-fast: false
+    name: Test Instance ${{ matrix.instance }}
     
     steps:
       - name: Checkout repository
@@ -87,7 +92,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: execution-artifacts
+          name: execution-artifacts-${{ matrix.instance }}
           path: |
             output/
             *.png
